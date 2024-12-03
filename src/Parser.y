@@ -65,32 +65,28 @@ parseError :: [Token] -> a
 parseError _ = error "Parse error"
 
 
-data ASA = Command ASA
-        | ExpArit ASA
-        | ExpBool ASA
-        -- Primitivos
-        | Num Double                 
+data ASA =  Num Double                 
         | Var String                 
         | Boolean Bool              
         -- Comando imperativos
-        | Program Command           
-        | Asignacion String ExpArit     -- Asignación: variable := expr
-        | While ExpBool Command         -
-        | Secuencia Command Command   -- c1; c2
-        | If ExpBool Command Command    -- if b then c1 else c2
-        | Skip                       -- skip
+        | Program ASA           
+        | Asignacion String ASA     -- Asignación: variable := expr
+        | While ASA ASA         
+        | Secuencia ASA ASA   
+        | If ASA ASA ASA    -- if b then c1 else c2
+        | Skip                      
         -- Expresiones aritméticas
-        | Suma ExpArit ExpArit             -- suma
-        | Resta ExpArit ExpArit             -- resta
-        | Mult ExpArit ExpArit             -- muMenoriplicación
-        | Div ExpArit ExpArit             -- división
+        | Resta ASA ASA           
+        | Suma ASA ASA            
+        | Mult ASA ASA            
+        | Div ASA ASA             
         -- Expresiones booleanas
-        | Not ExpBool                  -- not
-        | And ExpBool ExpBool            -- and
-        | Or ExpBool ExpBool             -- or
-        | Igual ExpArit ExpArit          -- =
-        | Menor ExpArit ExpArit             -- 
-        | Mayor ExpArit ExpArit             
+        | Not ASA                 
+        | And ASA ASA         
+        | Or ASA ASA          
+        | Igual ASA ASA       
+        | Menor ASA ASA       
+        | Mayor ASA ASA             
         deriving (Show)
 
 
