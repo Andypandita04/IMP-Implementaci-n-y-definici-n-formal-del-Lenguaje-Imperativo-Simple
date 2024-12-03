@@ -31,11 +31,7 @@ data Token = TkDouble Double
 
 lexer :: String -> [Token]
 lexer [] = []
-lexer (c:cs)
-    | isSpace c = lexer cs                  -- Ignorar espacios en blanco
-    | isDigit c = lexNum (c:cs) 
 lexer ('+' : xs) = TkSuma : lexer xs
-lexer ('-' : xs) = TkResta : lexer xs
 lexer ('/' : xs) = TkDiv : lexer xs
 lexer ('*' : xs) = TkMult : lexer xs
 lexer ('(':xs ) = TkParOpen: lexer xs
@@ -56,31 +52,31 @@ lexer('e' : 'l' : 's' : 'e' :  xs) = TkElse : lexer xs
 lexer('w' : 'h' : 'i' : 'l' : 'e' :  xs) = TkWhile : lexer xs
 lexer ( 'd' : 'o' : xs) = TkDo : lexer xs
 lexer('s' : 'k' : 'i' : 'p' :  xs) = TkSkip : lexer xs
-
---- Identificadores
+-- Numeros 
 lexer (c:cs)
-    | isSpace c = lexer cs                  -- Ignorar espacios en blanco
+    | isSpace c = lexer cs  
+    | c == '-' = case cs of
+        (d:ds) | isDigit d -> lexNum ('-':d:ds)  -- número negativo
+               | otherwise -> TkResta : lexer cs  
+    | isDigit c = lexNum (c:cs)
+--- Identificadores
     | isAlpha c = lexId (c:cs)  
 lexer _ = error "Tk desconocido"
 
--- Procesa numeros negativos y deciamels
-lexNum :: String -> [Token]
-lexNum ('-':cs) = case span (\c -> isDigit c || c == '.') cs of
-    (num, rest) -> TkDouble (-(read num)) : lexer rest
-lexNum cs = case span (\c -> isDigit c || c == '.') cs of
-    (num, rest) -> TkDouble (read num) : lexer rest
+--lexer ('-' : xs) = TkResta : lexer xs
 
--- Procesa identificadores 
+
+
+-- Procesa numeros negativos y deciamels
+--lexNum :: String -> [Token]
+--lexNum ('-':cs) = case span (\c -> isDigit c || c == '.') cs of
+--    (num, rest) -> TkDouble (-(read num)) : lexer rest
+--lexNum cs = case span (\c -> isDigit c || c == '.') cs of
+--  (num, rest) -> TkDouble (read num) : lexer rest
+
 lexId :: String -> [Token]
 lexId cs = case span isAlphaNum cs of
     (id, rest) -> TkId id : lexer rest
-
-    --lexer (c:cs)
-    -- | c == '-' = case cs of
-    --    (d:ds) | isDigit d -> lexNum ('-':d:ds)  -- número negativo
-    --           | otherwise -> TkMinus : lexer cs  -- operador menos
-    -- | isDigit c = lexNum (c:cs)
-    -- resto del lexer...
 
 lexNum :: String -> [Token]
 lexNum cs = case span (\c -> isDigit c || c == '.') cs of
@@ -88,7 +84,7 @@ lexNum cs = case span (\c -> isDigit c || c == '.') cs of
 
 instance Show Token where
   show (TkDouble d) =  show d
-  show (TkId d)     =  show d 
+  show (TkId d)     =  d 
   show TkSuma       = "+"
   show TkResta      = "-"
   show TkDiv        = "/"

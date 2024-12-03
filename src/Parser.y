@@ -65,21 +65,26 @@ parseError :: [Token] -> a
 parseError _ = error "Parse error"
 
 
-data ASA = Program Command           
+data ASA = Command ASA
+        | ExpArit ASA
+        | ExpBool ASA
+        -- Primitivos
+        | Num Double                 
+        | Var String                 
+        | Boolean Bool              
+        -- Comando imperativos
+        | Program Command           
         | Asignacion String ExpArit     -- Asignación: variable := expr
         | While ExpBool Command         -
         | Secuencia Command Command   -- c1; c2
         | If ExpBool Command Command    -- if b then c1 else c2
         | Skip                       -- skip
         -- Expresiones aritméticas
-        | Num Double                 -- números
-        | Var String                 -- variables
         | Suma ExpArit ExpArit             -- suma
         | Resta ExpArit ExpArit             -- resta
         | Mult ExpArit ExpArit             -- muMenoriplicación
         | Div ExpArit ExpArit             -- división
         -- Expresiones booleanas
-        | Boolean Bool              -- true/false
         | Not ExpBool                  -- not
         | And ExpBool ExpBool            -- and
         | Or ExpBool ExpBool             -- or
@@ -88,20 +93,47 @@ data ASA = Program Command
         | Mayor ExpArit ExpArit             
         deriving (Show)
 
+
 instance Show ASA where
-  show = undefined
+    show ast = case ast of
+        -- Programa
+        Program a -> show a        
+        -- Comandos
+        Asignacion var exp -> var ++ " := " ++ show exp
+        Secuencia a b -> show a ++ "; " ++ show b
+        If c t e -> "if " ++ show c ++ 
+                        " then " ++ show t ++ 
+                        " else " ++ show e
+        While c b -> "while " ++ show c ++ 
+                         " do " ++ show b
+        Skip -> "skip" 
+        -- Expresiones Aritméticas
+        Num n -> show n
+        Var x -> x
+        Suma e1 e2 -> "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
+        Resta e1 e2 -> "(" ++ show e1 ++ " - " ++ show e2 ++ ")"
+        Mult e1 e2 -> "(" ++ show e1 ++ " * " ++ show e2 ++ ")"
+        Div e1 e2 -> "(" ++ show e1 ++ " / " ++ show e2 ++ ")"
+        -- Expresiones Booleanas
+        Boolean b -> show b
+        Not b -> "(not " ++ show b ++ ")"
+        And b1 b2 -> "(" ++ show b1 ++ " and " ++ show b2 ++ ")"
+        Or b1 b2 -> "(" ++ show b1 ++ " or " ++ show b2 ++ ")"
+        Igual e1 e2 -> "(" ++ show e1 ++ " = " ++ show e2 ++ ")"
+        Menor e1 e2 -> "(" ++ show e1 ++ " < " ++ show e2 ++ ")"
+        Mayor e1 e2 -> "(" ++ show e1 ++ " > " ++ show e2 ++ ")"
 
 
-bool :: ASA -> Bool
-bool (Boolean b) = b
-bool _= error "Se espera un booleano"
+boolN :: ASA -> Bool
+boolN (Boolean b) = b
+boolN _= error "Se espera un booleano"
 
-num :: ASA -> Double
-num (Num n) = n
-num _ = error "Se espera un numero"
+numN :: ASA -> Double
+numN (Num n) = n
+numN_ = error "Se espera un numero"
 
-var :: ASA -> String
-var (Var v) = var
-var _ = eroor "Se espera una cadena"
+--var :: ASA -> String
+--var v = v
+--var _ = error "Se espera una cadena"
 
 }
