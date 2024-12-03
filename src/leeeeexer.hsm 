@@ -2,6 +2,7 @@ module Lexer where
 
 import Data.Char
 
+--Los constructores
 data Token = TkDouble Double
            | TkSuma
            | TkResta
@@ -26,13 +27,37 @@ data Token = TkDouble Double
            | TkDo
            | TkId
 
+doubleSpan :: String -> (String, String)
+doubleSpan xs = 
+    if null siguientesDigitos 
+    then (primerosDigitos, resto1)
+    else (primerosDigitos ++ siguientesDigitos ++ epsilon, resto3)
+  where
+    (primerosDigitos, resto1) = span isDigit xs
+    (siguientesDigitos, resto2) = case resto1 of
+      ('.':ys) -> let (ds, restoYS) = span isDigit ys in ('.':ds, restoYS)
+      _        -> ([], resto1)
+
+    (epsilon, resto3) = case resto2 of
+      ('e':ys) -> 
+          let (signoExp, restoExp) = case ys of
+                                       ('+':rest) -> ('+', rest)
+                                       ('-':rest) -> ('-', rest)
+                                       _          -> (' ', ys)  -- No hay signo, seguir con ys
+              (ds, restoFinal) = span isDigit restoExp 
+          in (signoExp:ds, restoFinal)
+      _            -> ([], resto2)
+
+
+
 
 
 lexer :: String -> [Token]
 lexer [] = []
 lexer (c:cs)
-    | isSpace c = lexer cs                  -- Ignorar espacios en blanco
-    | isDigit c = lexNum (c:cs) 
+    | isSpace c = lexer cs -- Ignorar espacios en blanco
+    | isDigit c = let (num, rest) = doubleSpan (c:cs)
+                  in TkDouble (read num) : lexer rest
 lexer ('+' : xs) = TkSuma : lexer xs
 lexer ('-' : xs) = TkResta : lexer xs
 lexer ('/' : xs) = TkDiv : lexer xs
@@ -54,34 +79,8 @@ lexer('t' : 'h' : 'e' : 'n' :  xs) = TkThen : lexer xs
 lexer('e' : 'l' : 's' : 'e' :  xs) = TkElse : lexer xs
 lexer('w' : 'h' : 'i' : 'l' : 'e' :  xs) = TkWhile : lexer xs
 lexer ( 'd' : 'o' : xs) = TkDo : lexer xs
---- Identificadores
-lexer (c:cs)
-    | isSpace c = lexer cs                  -- Ignorar espacios en blanco
-    | isAlpha c = lexId (c:cs)  
 lexer _ = error "Tk desconocido"
 
--- Procesa numeros negativos y deciamels
-lexNum :: String -> [Token]
-lexNum ('-':cs) = case span (\c -> isDigit c || c == '.') cs of
-    (num, rest) -> TkDouble (-(read num)) : lexer rest
-lexNum cs = case span (\c -> isDigit c || c == '.') cs of
-    (num, rest) -> TkDouble (read num) : lexer rest
-
--- Procesa identificadores 
-lexId :: String -> [Token]
-lexId cs = case span isAlphaNum cs of
-    (id, rest) -> TkId id : lexer rest
-
-    --lexer (c:cs)
-    -- | c == '-' = case cs of
-    --    (d:ds) | isDigit d -> lexNum ('-':d:ds)  -- número negativo
-    --           | otherwise -> TkMinus : lexer cs  -- operador menos
-    -- | isDigit c = lexNum (c:cs)
-    -- resto del lexer...
-
-lexNum :: String -> [Token]
-lexNum cs = case span (\c -> isDigit c || c == '.') cs of
-    (num, rest) -> TkDouble (read num) : lexer rest
 
 instance Show Token where
   show (TkDouble d) =  show d
