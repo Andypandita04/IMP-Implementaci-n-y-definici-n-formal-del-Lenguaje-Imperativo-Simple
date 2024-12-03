@@ -25,6 +25,7 @@ data Token = TkDouble Double
            | TkWhile
            | TkDo
            | TkId
+           | TkSkip
 
 
 
@@ -54,6 +55,8 @@ lexer('t' : 'h' : 'e' : 'n' :  xs) = TkThen : lexer xs
 lexer('e' : 'l' : 's' : 'e' :  xs) = TkElse : lexer xs
 lexer('w' : 'h' : 'i' : 'l' : 'e' :  xs) = TkWhile : lexer xs
 lexer ( 'd' : 'o' : xs) = TkDo : lexer xs
+lexer('s' : 'k' : 'i' : 'p' :  xs) = TkSkip : lexer xs
+
 --- Identificadores
 lexer (c:cs)
     | isSpace c = lexer cs                  -- Ignorar espacios en blanco
@@ -85,6 +88,7 @@ lexNum cs = case span (\c -> isDigit c || c == '.') cs of
 
 instance Show Token where
   show (TkDouble d) =  show d
+  show (TkId d)     =  show d 
   show TkSuma       = "+"
   show TkResta      = "-"
   show TkDiv        = "/"
@@ -106,3 +110,4 @@ instance Show Token where
   show TkElse       = "else"
   show TkWhile      = "while"
   show TkDo         = "do"
+  show TkSkip       = "skip"
