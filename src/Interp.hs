@@ -1,31 +1,59 @@
 module Interp where
+
 import Parser
-type Env = [(String, ASA)]
-interp :: ASA -> Env -> ASA
+
+type Env = [(String, Value)]
+
+data Value = NumV Double
+           | BooleanV Bool
+           | StateV Env 
+
+interp :: ASA -> Env -> Value
+
 -- Primitivos
 interp (Id i) env = lookupEnv i env
-interp (Num n) env = (Num n)
-interp (Boolean b) env = (Boolean b)
+interp (Num n) env = (NumV n)
+interp (Boolean b) env = (BooleanV b)
 -- Expresiones aritmeticas
-interp (Suma i d) env = Num ((numN (interp i env)) + (numN (interp d env)))
-interp (Resta i d) env = Num ((numN (interp i env)) - (numN (interp d env)))
-interp (Mult i d) env = Num ((numN (interp i env)) * (numN (interp d env)))
-interp (Div i d) env = Num ((numN (interp i env)) / (numN (interp d env)))
+interp (Suma i d) env = NumV ((numN (interp i env)) + (numN (interp d env)))
+interp (Resta i d) env = NumV ((numN (interp i env)) - (numN (interp d env)))
+interp (Mult i d) env = NumV ((numN (interp i env)) * (numN (interp d env)))
+interp (Div i d) env = NumV ((numN (interp i env)) / (numN (interp d env)))
 -- Expresiones Booleanas
-interp (Not e) env = Boolean (not (boolN (interp e env)))
-interp (And i d) env = Boolean ((boolN (interp i env)) && (boolN (interp d env)))
-interp (Or i d) env = Boolean ((boolN (interp i env)) || (boolN (interp d env)))
-interp (Igual i d) env = Boolean ((numN (interp i env)) == (numN (interp d env)))
-interp (Menor i d) env = Boolean ((numN (interp i env)) < (numN (interp d env)))
-interp (Mayor i d) env = Boolean ((numN (interp i env)) > (numN (interp d env)))
+interp (Not e) env = BooleanV (not (boolN (interp e env)))
+interp (And i d) env = BooleanV ((boolN (interp i env)) && (boolN (interp d env)))
+interp (Or i d) env = BooleanV ((boolN (interp i env)) || (boolN (interp d env)))
+interp (Igual i d) env = BooleanV ((numN (interp i env)) == (numN (interp d env)))
+interp (Menor i d) env = BooleanV ((numN (interp i env)) < (numN (interp d env)))
+interp (Mayor i d) env = BooleanV ((numN (interp i env)) > (numN (interp d env)))
 -- Comando imperativos
 interp (Program e) env = (interp e env) --
+
 interp (If c t e) env = 
     let c' = (interp c env) 
     in if (boolN c') then  (interp t env) else (interp e env)
 
+interp (Asignacion var exp) env =
+    let val = interp exp env
+    in StateV ((var, val):env)
 
+interp (Secuencia c1 c2) env =
+    case interp c1 env of
+        StateV env' -> interp c2 env'
+        _ -> error "Comando inválido"
 
+interp (Skip) env = StateV env  -- Skip mantiene el ambiente sin cambios
+
+interp (While cond body) env = 
+   case interp cond env of
+       BooleanV True -> 
+           case interp body env of
+               StateV env' -> interp (While cond body) env'
+               _ -> error "Cuerpo while debe retornar estado"
+       BooleanV False -> StateV env
+       _ -> error "Condición debe ser booleana"
+
+{-
 interp (Asignacion var exp) env = 
     let expEva = (interp exp env)
     in (var, expEva) : env       --Evalua la expresion y lo guarda en el ambiente
@@ -42,11 +70,11 @@ interp (Secuencia i d) env =
     let env' = (interp i env) --Aqui el primer comando 
     in (interp d env')        --Ejecuta segundo comando con el ambiente actulizado
 
-interp (Skip) env = env 
+interp (Skip) env = env -}
 
 
 
-lookupEnv :: String -> Env -> ASA
+lookupEnv :: String -> Env -> Value
 lookupEnv i [] = error ("Variable libre: " ++ i)
 lookupEnv i ((j, v) : xs)
   | i == j = v
@@ -55,13 +83,25 @@ lookupEnv i ((j, v) : xs)
 
 
 
-boolN :: ASA -> Bool
-boolN (Boolean b) = b
+boolN :: Value -> Bool
+boolN (BooleanV b) = b
 boolN _= error "Se espera un booleano"
 
-numN :: ASA -> Double
-numN (Num n) = n
+numN :: Value -> Double
+numN (NumV n) = n
 numN_ = error "Se espera un numero"
 
 
 
+--boolN :: ASA -> Bool
+--boolN (Boolean b) = b
+--boolN _= error "Se espera un booleano"
+
+--numN :: ASA -> Double
+--numN (Num n) = n
+--numN_ = error "Se espera un numero"
+
+instance Show Value where
+    show (NumV n) = show n
+    show (BooleanV b) = show b
+    show (StateV env) = show env
