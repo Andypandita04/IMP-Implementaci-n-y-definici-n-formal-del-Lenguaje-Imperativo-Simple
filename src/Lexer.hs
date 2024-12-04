@@ -24,7 +24,7 @@ data Token = TkDouble Double
            | TkElse
            | TkWhile
            | TkDo
-           | TkId
+           | TkId String
            | TkSkip
 
 

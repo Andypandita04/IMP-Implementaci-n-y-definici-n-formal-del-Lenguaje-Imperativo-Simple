@@ -17,7 +17,7 @@ false  { TkFalse }
 '-'    { TkResta }
 '*'    { TkMult }
 '/'    { TkDiv }
-'='    { TkEq }
+'='    { TkIgual }
 '<'    { TkMenor }
 '>'    { TkMayor }
 'and'  { TkAnd }
@@ -26,8 +26,29 @@ false  { TkFalse }
 '('    { TkParOpen }
 ')'    { TkParClose }
 'skip' { TkSkip }
+':='   { TkAsig }
+';'    { TkSeq }
+'if'   { TkIf }
+'then' { TkThen }
+'else' { TkElse }
+'while'{ TkWhile }
+'do'   { TkDo }
+
+%left 'or'
+%left 'and'
+%nonassoc '=' '<' '>'
+%left '+' '-'
+%left '*' '/'
+%right 'not'
+%left ';'  -- Secuenciación tiene la precedencia más baja
+%nonassoc 'then'
+%nonassoc 'else'
+%nonassoc 'do'
+%nonassoc 'while'
 -- Declaración de prec
 %%
+
+
 
 {- Definición de la sintaxis concreta -}
 
@@ -42,7 +63,7 @@ Command : id ':=' ExpArit                                      { Asignacion $1 $
 
 -- Expresiones aritméticas
 ExpArit : num                           { Num $1 }
-     | id                               { Var $1 }
+     | id                               { Id $1 }
      | ExpArit '+' ExpArit              { Suma $1 $3 }
      | ExpArit '-' ExpArit              { Resta $1 $3 }
      | ExpArit '*' ExpArit              { Mult $1 $3 }
@@ -66,7 +87,7 @@ parseError _ = error "Parse error"
 
 
 data ASA =  Num Double                 
-        | Var String                 
+        | Id String                 
         | Boolean Bool              
         -- Comando imperativos
         | Program ASA           
@@ -87,7 +108,7 @@ data ASA =  Num Double
         | Igual ASA ASA       
         | Menor ASA ASA       
         | Mayor ASA ASA             
-        deriving (Show)
+        --deriving (Show)
 
 
 instance Show ASA where
@@ -105,7 +126,7 @@ instance Show ASA where
         Skip -> "skip" 
         -- Expresiones Aritméticas
         Num n -> show n
-        Var x -> x
+        Id x -> x
         Suma e1 e2 -> "(" ++ show e1 ++ " + " ++ show e2 ++ ")"
         Resta e1 e2 -> "(" ++ show e1 ++ " - " ++ show e2 ++ ")"
         Mult e1 e2 -> "(" ++ show e1 ++ " * " ++ show e2 ++ ")"
@@ -120,13 +141,13 @@ instance Show ASA where
         Mayor e1 e2 -> "(" ++ show e1 ++ " > " ++ show e2 ++ ")"
 
 
-boolN :: ASA -> Bool
-boolN (Boolean b) = b
-boolN _= error "Se espera un booleano"
+--boolN :: ASA -> Bool
+--boolN (Boolean b) = b
+--boolN _= error "Se espera un booleano"
 
-numN :: ASA -> Double
-numN (Num n) = n
-numN_ = error "Se espera un numero"
+--numN :: ASA -> Double
+--numN (Num n) = n
+--numN_ = error "Se espera un numero"
 
 --var :: ASA -> String
 --var v = v
