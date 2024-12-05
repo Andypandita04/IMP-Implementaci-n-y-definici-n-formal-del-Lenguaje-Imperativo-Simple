@@ -142,16 +142,4 @@ instance Show ASA where
         Mayor e1 e2 -> "(" ++ show e1 ++ " > " ++ show e2 ++ ")"
 
 
---boolN :: ASA -> Bool
---boolN (Boolean b) = b
---boolN _= error "Se espera un booleano"
-
---numN :: ASA -> Double
---numN (Num n) = n
---numN_ = error "Se espera un numero"
-
---var :: ASA -> String
---var v = v
---var _ = error "Se espera una cadena"
-
 }

@@ -11,7 +11,10 @@ data Value = NumV Double
 interp :: ASA -> Env -> Value
 
 -- Primitivos
-interp (Id i) env = lookupEnv i env
+interp (Id i) env = lookupEnv i env 
+   {-case lookupEnv i env of
+   StateV env' -> lookupEnv i env'
+   val -> val-}
 interp (Num n) env = (NumV n)
 interp (Boolean b) env = (BooleanV b)
 -- Expresiones aritmeticas
@@ -33,12 +36,7 @@ interp (Program e) env = (interp e env) --
 interp (If c t e) env = 
     let c' = (interp c env) 
     in if (boolN c') then  (interp t env) else (interp e env)
-    
 
-{-interp (If c t e) env =
-    case interp c env of
-        (boolN b) -> if b then interp t env else interp e env
-        _ -> error "Condición debe ser booleana"-}
 
 interp (Asignacion var exp) env =
     let val = interp exp env
@@ -84,8 +82,8 @@ interp (Skip) env = env -}
 lookupEnv :: String -> Env -> Value
 lookupEnv i [] = error ("Variable libre: " ++ i)
 lookupEnv i ((j, v) : xs)
-  | i == j = v
-  | otherwise = lookupEnv i xs
+   | i == j = v
+   | otherwise = lookupEnv i xs
 
 
 
@@ -98,15 +96,6 @@ numN :: Value -> Double
 numN (NumV n) = n
 numN_ = error "Se espera un numero"
 
-
-
---boolN :: ASA -> Bool
---boolN (Boolean b) = b
---boolN _= error "Se espera un booleano"
-
---numN :: ASA -> Double
---numN (Num n) = n
---numN_ = error "Se espera un numero"
 
 instance Show Value where
     show (NumV n) = show n

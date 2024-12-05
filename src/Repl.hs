@@ -25,7 +25,7 @@ repl = do
     putStrLn $ show (interp (parser (lexer str)))
     repl-}
 
-
+{-  EL BUENOOOOOOOOOOOOOOOOOOOOOOOO
 repl = do
     putStr "> "
     str <- getLine
@@ -37,13 +37,33 @@ repl = do
             BooleanV b -> putStrLn $ show b
             StateV env -> putStrLn $ show env
             --ExprV e env -> putStrLn $ show $ interp e env
+        repl -}
+
+repl = do
+    putStr "> "
+    str <- getLine
+    if str == ":q" then
+        putStrLn "Bye."
+    else do
+        let tokens = lexer str
+        let ast = parser tokens
+        putStrLn $ "Tokens: " ++ show tokens
+        putStrLn $ "AST: " ++ show ast
+        case interp ast [] of
+            NumV n -> putStrLn $ show n
+            BooleanV b -> putStrLn $ show b
+            StateV env -> putStrLn $ show env
         repl
+
+
+
 -- Función principal. Da la bienvenida al usuario y ejecuta el REPL.
 run = do
   putStrLn "IMP Bienvenido." 
   repl
 
 main = run
+
 
 
 
