@@ -29,9 +29,16 @@ interp (Mayor i d) env = BooleanV ((numN (interp i env)) > (numN (interp d env))
 -- Comando imperativos
 interp (Program e) env = (interp e env) --
 
+
 interp (If c t e) env = 
     let c' = (interp c env) 
     in if (boolN c') then  (interp t env) else (interp e env)
+    
+
+{-interp (If c t e) env =
+    case interp c env of
+        (boolN b) -> if b then interp t env else interp e env
+        _ -> error "Condición debe ser booleana"-}
 
 interp (Asignacion var exp) env =
     let val = interp exp env
