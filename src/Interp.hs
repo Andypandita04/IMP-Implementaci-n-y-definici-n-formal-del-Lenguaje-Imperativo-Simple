@@ -45,7 +45,7 @@ interp (Asignacion var exp) env =
 interp (Secuencia c1 c2) env =
     case interp c1 env of
         StateV env' -> interp c2 env'
-        _ -> error "Comando inválido"
+        _ -> error "Error interp:  Comando inválido"
 
 interp (Skip) env = StateV env  -- Skip mantiene el ambiente sin cambios
 
@@ -54,9 +54,9 @@ interp (While cond body) env =
        BooleanV True -> 
            case interp body env of
                StateV env' -> interp (While cond body) env'
-               _ -> error "Cuerpo while debe retornar estado"
+               _ -> error "Error interp:  Cuerpo while debe retornar estado"
        BooleanV False -> StateV env
-       _ -> error "Condición debe ser booleana"
+       _ -> error "Error interp:  Condición debe ser booleana"
 
 {-
 interp (Asignacion var exp) env = 
@@ -80,7 +80,7 @@ interp (Skip) env = env -}
 
 
 lookupEnv :: String -> Env -> Value
-lookupEnv i [] = error ("Variable libre: " ++ i)
+lookupEnv i [] = error ("Error interp: Variable libre: "  ++ i)
 lookupEnv i ((j, v) : xs)
    | i == j = v
    | otherwise = lookupEnv i xs
@@ -90,11 +90,11 @@ lookupEnv i ((j, v) : xs)
 
 boolN :: Value -> Bool
 boolN (BooleanV b) = b
-boolN _= error "Se espera un booleano"
+boolN _= error "Error interp:  Se espera un booleano"
 
 numN :: Value -> Double
 numN (NumV n) = n
-numN_ = error "Se espera un numero"
+numN_ = error "Error interp:  Se espera un numero"
 
 
 instance Show Value where

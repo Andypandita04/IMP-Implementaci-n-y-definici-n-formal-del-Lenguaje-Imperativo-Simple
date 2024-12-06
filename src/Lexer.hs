@@ -62,7 +62,7 @@ lexer('s' : 'k' : 'i' : 'p' :  xs) = TkSkip : lexer xs
 lexer (c:cs)
 --- Identificadores
     | isAlpha c = lexId (c:cs)  
-lexer _ = error "Tk desconocido"
+lexer _ = error "Error Lexer: Tk desconocido"
 
 lexId :: String -> [Token]
 lexId cs = case span isAlphaNum cs of

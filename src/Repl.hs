@@ -3,6 +3,7 @@ module Repl where
 import Parser
 import Lexer
 import Interp
+import Type
 
 import Data.Char
 
@@ -14,16 +15,7 @@ import Data.Char
 --    orden siguiente: léxico, sintáctico, semántico.
 -- 5. Vuelve a ejecutar el ciclo.
 
-{-- PRACTICA 2 
-repl = do
-  putStr "> "
-  str <- getLine
-  let lst = words str
-  if str == ":q" then 
-    putStrLn "Bye." 
-    else do
-    putStrLn $ show (interp (parser (lexer str)))
-    repl-}
+
 
 {-  EL BUENOOOOOOOOOOOOOOOOOOOOOOOO
 repl = do
@@ -39,6 +31,7 @@ repl = do
             --ExprV e env -> putStrLn $ show $ interp e env
         repl -}
 
+{- ESTE IMPRIME TOKEN Y ASAś
 repl = do
     putStr "> "
     str <- getLine
@@ -53,6 +46,23 @@ repl = do
             NumV n -> putStrLn $ show n
             BooleanV b -> putStrLn $ show b
             StateV env -> putStrLn $ show env
+        repl-}
+repl = do
+    putStr "> "
+    str <- getLine
+    if str == ":q" then
+        putStrLn "Bye."
+    else do
+        let tokens = lexer str
+        let ast = parser tokens
+        -- Primero verifica tipos
+        case typeof ast [] of
+            TUnit -> do  -- Si es un comando válido, procede a interpretarlo
+                case interp ast [] of
+                    NumV n -> putStrLn $ show n
+                    BooleanV b -> putStrLn $ show b
+                    StateV env -> putStrLn $ show env
+            t -> putStrLn $ "Tipo: " ++ show t  -- Para expresiones, muestra su tipo
         repl
 
 
