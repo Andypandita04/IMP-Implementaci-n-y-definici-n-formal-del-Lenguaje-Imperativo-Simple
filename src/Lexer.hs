@@ -31,6 +31,13 @@ data Token = TkDouble Double
 
 lexer :: String -> [Token]
 lexer [] = []
+-- Numeros 
+lexer (c:cs)
+    | isSpace c = lexer cs  
+    | c == '-' = case cs of
+        (d:ds) | isDigit d -> lexNum ('-':d:ds)  -- número negativo
+               | otherwise -> TkResta : lexer cs  
+    | isDigit c = lexNum (c:cs)
 lexer ('+' : xs) = TkSuma : lexer xs
 lexer ('/' : xs) = TkDiv : lexer xs
 lexer ('*' : xs) = TkMult : lexer xs
@@ -52,27 +59,10 @@ lexer('e' : 'l' : 's' : 'e' :  xs) = TkElse : lexer xs
 lexer('w' : 'h' : 'i' : 'l' : 'e' :  xs) = TkWhile : lexer xs
 lexer ( 'd' : 'o' : xs) = TkDo : lexer xs
 lexer('s' : 'k' : 'i' : 'p' :  xs) = TkSkip : lexer xs
--- Numeros 
 lexer (c:cs)
-    | isSpace c = lexer cs  
-    | c == '-' = case cs of
-        (d:ds) | isDigit d -> lexNum ('-':d:ds)  -- número negativo
-               | otherwise -> TkResta : lexer cs  
-    | isDigit c = lexNum (c:cs)
 --- Identificadores
     | isAlpha c = lexId (c:cs)  
-lexer _ = error "Tk desconocido"
-
---lexer ('-' : xs) = TkResta : lexer xs
-
-
-
--- Procesa numeros negativos y deciamels
---lexNum :: String -> [Token]
---lexNum ('-':cs) = case span (\c -> isDigit c || c == '.') cs of
---    (num, rest) -> TkDouble (-(read num)) : lexer rest
---lexNum cs = case span (\c -> isDigit c || c == '.') cs of
---  (num, rest) -> TkDouble (read num) : lexer rest
+lexer _ = error "Error Lexer: Tk desconocido"
 
 lexId :: String -> [Token]
 lexId cs = case span isAlphaNum cs of
